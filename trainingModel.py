@@ -31,6 +31,7 @@ def optimize_banister(params):
     losses = [] #Create an empty list to store the loss values from our model
     ctls = [0] #Create an empty list to store the CTL values from our model with starting CTL of 0
     atls = [0] #Create an empty list to store the ATL values from our model with starting ATL of 0 for i in range(len(TSS)):
+    print(params[3], params[4])
     for i in range(len(TSS)):
         ctl = (TSS[i] * (1-math.exp(-1/params[3]))) + (ctls[i] * (math.exp(-1/params[3]))) #Calculate the CTL for the day
         atl = (TSS[i] * (1-math.exp(-1/params[4]))) + (atls[i] * (math.exp(-1/params[4]))) #Calculate the ATL for the day
