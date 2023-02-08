@@ -1,15 +1,31 @@
 import math
 import pandas as pd
 import numpy as np
-from scipy import optimize
+from scipy import optimize 
+from sklearn.neural_network import MLPRegressor
+
+data = pd.read_csv('workouts.csv')
+data.describe()
+Actual_Performance = data['IF']
+Offset_Performance = []
+for i in range(len(Actual_Performance)):
+    Offset_Performance.append(np.mean(Actual_Performance[i: (i+28)])) 
+TSS = data['TSS']
+Block_TSS = [] 
+for i in range(len(TSS)):
+    avg_TSS = np.mean(TSS[i:(i+28)])
+    Block_TSS.append(avg_TSS)
+
 
 def calc_vo2_if_bike(row, max_hr, resting_hr, weight) :
-
     if row['WorkoutType'] == 'Bike':
         percent_vo2 = (row['HeartRateAverage'] - resting_hr) / (max_hr - resting_hr)
         vo2_power = row['PowerAverage'] / percent_vo2
         vo2_estimated = (((vo2_power)/75)*1000)/weight
         return vo2_estimated
+
+
+
 
 def optimize_banister(params):
     data = pd.read_csv('workouts.csv')
@@ -31,7 +47,6 @@ def optimize_banister(params):
     losses = [] #Create an empty list to store the loss values from our model
     ctls = [0] #Create an empty list to store the CTL values from our model with starting CTL of 0
     atls = [0] #Create an empty list to store the ATL values from our model with starting ATL of 0 for i in range(len(TSS)):
-    print(params[3], params[4])
     for i in range(len(TSS)):
         ctl = (TSS[i] * (1-math.exp(-1/params[3]))) + (ctls[i] * (math.exp(-1/params[3]))) #Calculate the CTL for the day
         atl = (TSS[i] * (1-math.exp(-1/params[4]))) + (atls[i] * (math.exp(-1/params[4]))) #Calculate the ATL for the day
@@ -40,12 +55,19 @@ def optimize_banister(params):
         Banister_Prediction = params[2] + params[0]*ctl - params[1]*atl #Calculate the Banister Prediction for the day
         loss = abs(Performance[i]- Banister_Prediction)
         losses.append(loss) #Add the loss to the list
-    # print(f"CTLs: {ctls}") 
+    # print(f"CTLs: {ctls}")
     # print(f"ATLS: {atls}")
     MAE= np.mean(losses) #Calculate the mean absolute error
     # print(f"MAE: {MAE}")
     return MAE
+    
 
 initial_guess = [0.1, 0.5, 50, 40, 15]
 individual_banister_model = optimize.minimize(optimize_banister,  x0 = initial_guess, bounds=[(0,1),(0,1),(20,50),(20,60),(10,20)])
 print(individual_banister_model)
+
+# Individual Neural Network Model
+individual_neural_net_model = MLPRegressor(solver='lbfgs', activation='relu', hidden_layer_sizes=[50], random_state=42)
+print(Block_TSS)
+print(Offset_Performance)
+individual_neural_net_model.fit(Block_TSS, Offset_Performance)
