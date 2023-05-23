@@ -39,10 +39,10 @@ def Banister(k1, k2, P0, CTLC, ATLC):
     MAE= np.mean(losses)
     return MAE
 
-initial_guess = [0.1, 0.5, 50, 45, 15]
-individual_banister_model = optimize.minimize(Banister, initial_guess)
-print(individual_banister_model)
+# initial_guess = [0.1, 0.5, 50, 45, 15]
+# individual_banister_model = optimize.minimize(Banister, initial_guess)
+# print(individual_banister_model)ls
 
 #Individual Neural Network Model
-# individual_neural_net_model = MLPRegressor(solver='lbfgs', activation='relu', hidden_layer_sizes=[50], random_state=42)
-# individual_neural_net_model.fit(Block_TSS, Offset_Performance)
+individual_neural_net_model = MLPRegressor(solver='lbfgs', activation='relu', hidden_layer_sizes=[50], random_state=42)
+individual_neural_net_model.fit(Block_TSS, Offset_Performance)
